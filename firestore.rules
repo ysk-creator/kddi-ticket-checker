@@ -1,0 +1,86 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to get user data
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    // Helper function to check user role
+    function hasRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return hasRole('admin');
+    }
+    
+    // Helper function to check if user is sales
+    function isSales() {
+      return hasRole('sales');
+    }
+    
+    // Helper function to check if user is KDDI
+    function isKddi() {
+      return hasRole('kddi');
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Anyone can read their own user document
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Admin can read all users
+      allow read: if isAdmin();
+      
+      // Sales and KDDI can read KDDI users (for dropdown lists)
+      allow read: if isAuthenticated() && resource.data.role == 'kddi';
+      
+      // Users can create their own document on first login
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Only admin can update user roles
+      allow update: if isAdmin();
+    }
+    
+    // Tickets collection
+    match /tickets/{ticketId} {
+      // Admin can do anything with tickets
+      allow read, write: if isAdmin();
+      
+      // Sales users: can read all tickets
+      allow read: if isSales();
+      
+      // Sales users: can create tickets
+      allow create: if isSales();
+      
+      // Sales users: can update/delete only their own tickets
+      allow update, delete: if isSales() && resource.data.createdBy == request.auth.uid;
+      
+      // KDDI users: can only read tickets assigned to them
+      allow read: if isKddi() && resource.data.assignedKddiId == request.auth.uid;
+      
+      // KDDI users: can only update status and comment fields on tickets assigned to them
+      allow update: if isKddi() 
+        && resource.data.assignedKddiId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'comment', 'updatedAt', 'completedAt']);
+    }
+    
+    // Notification logs collection (server-side only in production)
+    match /notificationLogs/{logId} {
+      // Admin can read logs
+      allow read: if isAdmin();
+      
+      // No client-side writes (only server can write via Admin SDK)
+      allow write: if false;
+    }
+  }
+}
