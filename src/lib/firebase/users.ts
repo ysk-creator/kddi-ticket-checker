@@ -35,11 +35,11 @@ export async function getUserById(userId: string): Promise<User | null> {
     return convertFirestoreUser(docSnap.id, docSnap.data() as FirestoreUser);
 }
 
-// Get all KDDI users (for dropdown selection)
-export async function getKddiUsers(): Promise<User[]> {
+// Get all partner users (for dropdown selection)
+export async function getPartnerUsers(): Promise<User[]> {
     const q = query(
         collection(db, USERS_COLLECTION),
-        where('role', '==', 'kddi')
+        where('role', '==', 'partner')
     );
 
     const querySnapshot = await getDocs(q);

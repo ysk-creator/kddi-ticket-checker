@@ -365,7 +365,7 @@ export default function TicketDetailPage({ params }: PageProps) {
                         </CardContent>
                     </Card>
 
-                    {/* Status Update (KDDI only) */}
+                    {/* Status Update (Partner only) */}
                     {canStatus && (
                         <Card className="bg-white border-gray-200 shadow-sm">
                             <CardHeader>

@@ -43,8 +43,8 @@ export default function NewTicketPage() {
                     customerName: formData.customerName,
                     description: formData.description,
                     deadline: new Date(formData.deadline),
-                    assignedKddiId: '', // Single KDDI user - will be assigned automatically
-                    assignedKddiEmail: '',
+                    assignedPartnerId: '', // Single partner user - will be assigned automatically
+                    assignedPartnerEmail: '',
                 },
                 user.id
             );
@@ -58,7 +58,7 @@ export default function NewTicketPage() {
         }
     };
 
-    if (user?.role === 'kddi') {
+    if (user?.role === 'partner') {
         return (
             <div className="text-center py-12">
                 <p className="text-gray-500">チケット作成権限がありません</p>

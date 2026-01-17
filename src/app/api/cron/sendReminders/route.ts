@@ -5,7 +5,7 @@ import { generateOverdueReminderContent } from '@/lib/notifications/notification
 import { Ticket, TicketStatus, TicketType } from '@/types';
 
 /**
- * Cron endpoint for sending reminder emails to KDDI users with overdue tickets
+ * Cron endpoint for sending reminder emails to partner users with overdue tickets
  * 
  * This endpoint should be called once a day at 9:00 AM JST
  * Can be triggered by:
@@ -39,8 +39,8 @@ export async function POST() {
                     customerName: data.customerName,
                     description: data.description,
                     deadline: data.deadline.toDate(),
-                    assignedKddiId: data.assignedKddiId,
-                    assignedKddiEmail: data.assignedKddiEmail,
+                    assignedPartnerId: data.assignedPartnerId,
+                    assignedPartnerEmail: data.assignedPartnerEmail,
                     createdBy: data.createdBy,
                     status: data.status as TicketStatus,
                     comment: data.comment,
@@ -59,12 +59,12 @@ export async function POST() {
             });
         }
 
-        // Group tickets by assigned KDDI user
+        // Group tickets by assigned partner user
         const ticketsByUser = overdueTickets.reduce((acc, ticket) => {
-            const userId = ticket.assignedKddiId;
+            const userId = ticket.assignedPartnerId;
             if (!acc[userId]) {
                 acc[userId] = {
-                    email: ticket.assignedKddiEmail,
+                    email: ticket.assignedPartnerEmail,
                     tickets: [],
                 };
             }
@@ -81,7 +81,7 @@ export async function POST() {
             error?: string;
         }> = [];
 
-        // Send emails to each KDDI user
+        // Send emails to each partner user
         for (const [userId, { email, tickets }] of Object.entries(ticketsByUser)) {
             // Check if already sent today (prevent duplicates)
             const existingLogSnapshot = await db

@@ -1,5 +1,5 @@
 // User roles
-export type UserRole = 'sales' | 'admin' | 'kddi';
+export type UserRole = 'sales' | 'admin' | 'partner';
 
 // Ticket status - 5 stages
 export type TicketStatus =
@@ -32,7 +32,7 @@ export const TICKET_TYPE_LABELS: Record<TicketType, string> = {
 export const USER_ROLE_LABELS: Record<UserRole, string> = {
   sales: '営業',
   admin: '管理者',
-  kddi: 'KDDI担当',
+  partner: 'パートナー担当',
 };
 
 // Ticket interface
@@ -42,8 +42,8 @@ export interface Ticket {
   customerName: string;
   description: string;
   deadline: Date;
-  assignedKddiId: string;
-  assignedKddiEmail: string;
+  assignedPartnerId: string;
+  assignedPartnerEmail: string;
   createdBy: string;
   status: TicketStatus;
   comment?: string;
@@ -58,8 +58,8 @@ export interface CreateTicketData {
   customerName: string;
   description: string;
   deadline: Date;
-  assignedKddiId: string;
-  assignedKddiEmail: string;
+  assignedPartnerId: string;
+  assignedPartnerEmail: string;
 }
 
 // Ticket data for update
@@ -68,8 +68,8 @@ export interface UpdateTicketData {
   customerName?: string;
   description?: string;
   deadline?: Date;
-  assignedKddiId?: string;
-  assignedKddiEmail?: string;
+  assignedPartnerId?: string;
+  assignedPartnerEmail?: string;
   status?: TicketStatus;
   comment?: string;
 }
@@ -99,7 +99,7 @@ export interface NotificationLog {
 export interface TicketFilters {
   status?: TicketStatus | 'all' | 'all_except_completed';
   type?: TicketType | 'all';
-  assignedKddiId?: string | 'all';
+  assignedPartnerId?: string | 'all';
   overdueOnly?: boolean;
 }
 
@@ -117,8 +117,8 @@ export interface FirestoreTicket {
   customerName: string;
   description: string;
   deadline: { toDate: () => Date };
-  assignedKddiId: string;
-  assignedKddiEmail: string;
+  assignedPartnerId: string;
+  assignedPartnerEmail: string;
   createdBy: string;
   status: TicketStatus;
   comment?: string;

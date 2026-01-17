@@ -33,8 +33,8 @@ function convertFirestoreTicket(id: string, data: FirestoreTicket): Ticket {
         customerName: data.customerName,
         description: data.description,
         deadline: data.deadline.toDate(),
-        assignedKddiId: data.assignedKddiId,
-        assignedKddiEmail: data.assignedKddiEmail,
+        assignedPartnerId: data.assignedPartnerId,
+        assignedPartnerEmail: data.assignedPartnerEmail,
         createdBy: data.createdBy,
         status: data.status,
         comment: data.comment,
@@ -84,7 +84,7 @@ export async function updateTicket(
     await updateDoc(doc(db, TICKETS_COLLECTION, ticketId), updateData);
 }
 
-// Update ticket status (for KDDI users)
+// Update ticket status (for partner users)
 export async function updateTicketStatus(
     ticketId: string,
     status: TicketStatus,
@@ -127,11 +127,11 @@ export async function getTickets(
 
     // Apply role-based filtering
     if (user) {
-        if (user.role === 'kddi') {
-            // KDDI users can only see tickets assigned to them
+        if (user.role === 'partner') {
+            // Partner users can only see tickets assigned to them
             q = query(
                 collection(db, TICKETS_COLLECTION),
-                where('assignedKddiId', '==', user.id),
+                where('assignedPartnerId', '==', user.id),
                 orderBy('createdAt', 'desc')
             );
         }
@@ -156,8 +156,8 @@ export async function getTickets(
         tickets = tickets.filter((t) => t.type === filters.type);
     }
 
-    if (filters.assignedKddiId && filters.assignedKddiId !== 'all') {
-        tickets = tickets.filter((t) => t.assignedKddiId === filters.assignedKddiId);
+    if (filters.assignedPartnerId && filters.assignedPartnerId !== 'all') {
+        tickets = tickets.filter((t) => t.assignedPartnerId === filters.assignedPartnerId);
     }
 
     if (filters.overdueOnly) {
@@ -209,5 +209,5 @@ export function canEditTicket(ticket: Ticket, user: User): boolean {
 
 // Check if user can update ticket status
 export function canUpdateStatus(user: User): boolean {
-    return user.role === 'kddi';
+    return user.role === 'partner';
 }
