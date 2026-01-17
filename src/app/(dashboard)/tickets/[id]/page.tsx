@@ -143,6 +143,23 @@ export default function TicketDetailPage({ params }: PageProps) {
         try {
             await updateTicketStatus(ticket.id, statusForm.status, statusForm.comment);
 
+            // Send notification email to ticket creator
+            try {
+                await fetch('/api/notify/statusUpdate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ticketId: ticket.id,
+                        newStatus: statusForm.status,
+                        updatedBy: user.id,
+                        comment: statusForm.comment,
+                    }),
+                });
+            } catch (notifyError) {
+                console.error('Failed to send notification:', notifyError);
+                // Don't block status update if notification fails
+            }
+
             // Refresh ticket data
             const updatedTicket = await getTicketById(ticket.id);
             if (updatedTicket) {
@@ -191,7 +208,7 @@ export default function TicketDetailPage({ params }: PageProps) {
 
     const overdue = isOverdue(ticket.deadline) && ticket.status !== 'completed';
     const canEdit = user ? canEditTicket(ticket, user) : false;
-    const canStatus = user ? canUpdateStatus(user) : false;
+    const canStatus = user ? canUpdateStatus(ticket, user) : false;
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">

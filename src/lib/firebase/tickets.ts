@@ -208,6 +208,14 @@ export function canEditTicket(ticket: Ticket, user: User): boolean {
 }
 
 // Check if user can update ticket status
-export function canUpdateStatus(user: User): boolean {
-    return user.role === 'partner';
+// Partner role can update any ticket, ticket creator can update their own ticket
+export function canUpdateStatus(ticket: Ticket, user: User): boolean {
+    if (user.role === 'partner') {
+        return true;
+    }
+    // Ticket creator can also update status
+    if (ticket.createdBy === user.id) {
+        return true;
+    }
+    return false;
 }
